@@ -1,0 +1,1 @@
+export 'shared/navigation_bar_widget.dart';
