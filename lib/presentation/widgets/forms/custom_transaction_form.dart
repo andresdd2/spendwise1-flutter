@@ -17,78 +17,75 @@ class _CustomTransactionForm extends State<CustomTransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Custom Fields Example')),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              CustomTextAreaField(
-                label: 'Descripción',
-                hintText: 'Escribe una descripción detallada...',
-                maxLines: 5,
-                maxLength: 500,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'La descripción es requerida';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              CustomDropdownField<String>(
-                label: 'Categoría',
-                hintText: 'Selecciona una categoría',
-                value: selectedCategory,
-                items: [
-                  DropdownMenuItem(value: 'cat1', child: Text('Categoría 1')),
-                  DropdownMenuItem(value: 'cat2', child: Text('Categoría 2')),
-                  DropdownMenuItem(value: 'cat3', child: Text('Categoría 3')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Selecciona una categoría';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              CustomDatePickerField(
-                label: 'Fecha',
-                hintText: 'Selecciona una fecha',
-                selectedDate: selectedDate,
-                onDateSelected: (date) {
-                  setState(() {
-                    selectedDate = date;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'La fecha es requerida';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Formulario válido')),
-                    );
-                  }
-                },
-                child: Text('Validar'),
-              ),
-            ],
-          ),
+    return Form(
+      key: _formKey,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            CustomTextAreaField(
+              label: 'Descripción',
+              hintText: 'Escribe una descripción detallada...',
+              maxLines: 5,
+              maxLength: 500,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'La descripción es requerida';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            CustomDropdownField<String>(
+              label: 'Categoría',
+              hintText: 'Selecciona una categoría',
+              value: selectedCategory,
+              items: const [
+                DropdownMenuItem(value: 'cat1', child: Text('Categoría 1')),
+                DropdownMenuItem(value: 'cat2', child: Text('Categoría 2')),
+                DropdownMenuItem(value: 'cat3', child: Text('Categoría 3')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  selectedCategory = value;
+                });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Selecciona una categoría';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            CustomDatePickerField(
+              label: 'Fecha',
+              hintText: 'Selecciona una fecha',
+              selectedDate: selectedDate,
+              onDateSelected: (date) {
+                setState(() {
+                  selectedDate = date;
+                });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'La fecha es requerida';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Formulario válido')),
+                  );
+                }
+              },
+              child: const Text('Validar'),
+            ),
+          ],
         ),
       ),
     );

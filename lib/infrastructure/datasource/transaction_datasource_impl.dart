@@ -36,7 +36,7 @@ class TransactionDatasourceImpl implements TransactionDatasource {
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = response.data;
         if (jsonList.isEmpty) {
-          throw Exception('No se recibieron datos de los totales.');
+          return Totals(income: 0, expense: 0);
         }
         final model = TotalsModel.fromJson(jsonList.first as Map<String, dynamic>);
         return TotalsMapper.toEntity(model);

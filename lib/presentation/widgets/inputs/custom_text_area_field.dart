@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spendwise_1/config/theme/app_palette.dart';
 
 class CustomTextAreaField extends StatelessWidget {
   final String? label;
@@ -32,14 +33,14 @@ class CustomTextAreaField extends StatelessWidget {
       initialValue: initialValue,
       maxLines: maxLines,
       maxLength: maxLength,
-      style: TextStyle(color: Colors.black),
-      cursorColor: Colors.black,
+      style: TextStyle(color: AppPalette.grisClaro),
+      cursorColor: AppPalette.grisClaro,
       decoration: InputDecoration(
         enabledBorder: border.copyWith(
-          borderSide: BorderSide(color: Colors.blueAccent),
+          borderSide: BorderSide(color:   AppPalette.grisClaro),
         ),
         focusedBorder: border.copyWith(
-          borderSide: BorderSide(color: Colors.blueAccent),
+          borderSide: BorderSide(color: AppPalette.grisClaro),
         ),
         errorBorder: border.copyWith(
           borderSide: BorderSide(color: Colors.red.shade800),
@@ -48,16 +49,16 @@ class CustomTextAreaField extends StatelessWidget {
           borderSide: BorderSide(color: Colors.red.shade800),
         ),
         label: label != null ? Text(label!) : null,
-        labelStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        labelStyle: TextStyle(color: AppPalette.grisClaro),
         hintText: hintText,
-        hintStyle: TextStyle(color: Colors.grey),
-        focusColor: Colors.blueAccent,
+        hintStyle: TextStyle(color: AppPalette.grisClaro),
+        focusColor: AppPalette.cComponent,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 10,
           vertical: 12,
         ),
         filled: true,
-        fillColor: Colors.white60,
+        fillColor: AppPalette.cComponent3,
         errorText: errorMessage,
         alignLabelWithHint: true,
       ),

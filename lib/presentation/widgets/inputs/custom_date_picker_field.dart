@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spendwise_1/config/theme/app_palette.dart';
 
 class CustomDatePickerField extends StatelessWidget {
   final String? label;
@@ -47,10 +48,25 @@ class CustomDatePickerField extends StatelessWidget {
                   builder: (context, child) {
                     return Theme(
                       data: Theme.of(context).copyWith(
-                        colorScheme: ColorScheme.light(
-                          primary: Colors.blueAccent,
-                          onPrimary: Colors.white,
-                          onSurface: Colors.black,
+                        colorScheme: ColorScheme.dark(
+                          primary: AppPalette
+                              .cAccent, // Color principal (header y selección)
+                          onPrimary: AppPalette
+                              .cText, // Texto sobre el color principal
+                          surface:
+                              AppPalette.cComponent, // Fondo del calendario
+                          onSurface: AppPalette.cText, // Texto de los días
+                          background:
+                              AppPalette.cBackground, // Fondo del diálogo
+                          onBackground:
+                              AppPalette.cText, // Texto sobre el fondo
+                        ),
+                        dialogBackgroundColor: AppPalette.cComponent,
+                        textButtonTheme: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                            foregroundColor:
+                                AppPalette.cAccent, // Color de los botones
+                          ),
                         ),
                       ),
                       child: child!,
@@ -65,10 +81,10 @@ class CustomDatePickerField extends StatelessWidget {
               child: InputDecorator(
                 decoration: InputDecoration(
                   enabledBorder: border.copyWith(
-                    borderSide: BorderSide(color: Colors.blueAccent),
+                    borderSide: BorderSide(color: AppPalette.grisClaro),
                   ),
                   focusedBorder: border.copyWith(
-                    borderSide: BorderSide(color: Colors.blueAccent),
+                    borderSide: BorderSide(color: AppPalette.grisClaro),
                   ),
                   errorBorder: border.copyWith(
                     borderSide: BorderSide(color: Colors.red.shade800),
@@ -77,23 +93,20 @@ class CustomDatePickerField extends StatelessWidget {
                     borderSide: BorderSide(color: Colors.red.shade800),
                   ),
                   label: label != null ? Text(label!) : null,
-                  labelStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  labelStyle: TextStyle(color: AppPalette.grisClaro),
                   hintText: hintText,
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintStyle: TextStyle(color: AppPalette.grisClaro),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 12,
                   ),
                   filled: true,
-                  fillColor: Colors.white60,
+                  fillColor: AppPalette.cComponent3,
                   errorText: errorMessage ?? state.errorText,
                   suffixIcon: Icon(
                     Icons.calendar_today,
-                    color: Colors.blueAccent,
+                    color: AppPalette.grisClaro,
                   ),
                 ),
                 child: Text(
@@ -101,7 +114,9 @@ class CustomDatePickerField extends StatelessWidget {
                       ? _formatDate(selectedDate!)
                       : hintText ?? '',
                   style: TextStyle(
-                    color: selectedDate != null ? Colors.black : Colors.grey,
+                    color: selectedDate != null
+                        ? AppPalette.grisClaro
+                        : Colors.grey,
                   ),
                 ),
               ),

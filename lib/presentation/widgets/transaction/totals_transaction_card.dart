@@ -20,13 +20,13 @@ class TotalsTransactionCard extends StatelessWidget {
       padding: const EdgeInsets.only(left: 6, top: 20, right: 6, bottom: 20),
       child: Container(
         decoration: BoxDecoration(
-          color: AppPalette.cComponent2,
+          color: AppPalette.cComponent3,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
               blurRadius: 12,
-              offset: Offset(0, 6),
-              color: Colors.black26
+              offset: Offset(0, 2),
+              color: AppPalette.cComponent2
             )
           ]
         ),
