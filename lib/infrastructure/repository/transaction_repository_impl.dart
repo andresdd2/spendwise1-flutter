@@ -17,4 +17,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<Totals> getTotals(int year, int month) async {
     return await datasource.getTotals(year, month);
   }
+  
+  @override
+  Future<String> createTransaction(Transaction transaction) async {
+    return await datasource.createTransaction(transaction);
+  }
 }

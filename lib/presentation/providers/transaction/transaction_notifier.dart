@@ -21,22 +21,19 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
     }
   }
 
-  // CRUD OPERATIONS
-  Future<void> addTransaction(Transaction transaction) async {
+  Future<String> addTransaction(Transaction transaction) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      // Aquí llamarías a tu método del repository para crear
-      // await repository.createTransaction(transaction);
-
-      // Actualización optimista (opcional)
+      final message = await repository.createTransaction(transaction);
       state = state.copyWith(
         transactions: [...state.transactions, transaction],
+        isLoading: false,
       );
-
-      // Recargar para sincronizar con el servidor
       await loadTransactions();
+      return message;
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-      rethrow;
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      throw Exception(e);
     }
   }
 

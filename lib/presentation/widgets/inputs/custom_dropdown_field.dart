@@ -3,7 +3,7 @@ import 'package:spendwise_1/config/theme/app_palette.dart';
 
 class CustomDropdownField<T> extends StatelessWidget {
   final String? label;
-  final String? hintText; // lo mantenemos por compatibilidad
+  final String? hintText;
   final String? errorMessage;
   final T? value;
   final List<DropdownMenuItem<T>> items;
@@ -26,7 +26,6 @@ class CustomDropdownField<T> extends StatelessWidget {
     final border = OutlineInputBorder(borderRadius: BorderRadius.circular(15));
     final textStyle = TextStyle(color: AppPalette.grisClaro);
 
-    // 1) Asegurar el mismo estilo para menú y seleccionado
     final effectiveItems = items.map((e) {
       return DropdownMenuItem<T>(
         value: e.value,

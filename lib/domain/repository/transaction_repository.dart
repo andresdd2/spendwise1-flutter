@@ -5,4 +5,5 @@ abstract class TransactionRepository {
 
   Future<List<Transaction>> getTransactions();
   Future<Totals> getTotals(int year, int month);
+  Future<String> createTransaction(Transaction transaction);
 }
