@@ -7,7 +7,7 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
   final TransactionRepository repository;
 
   TransactionsNotifier(this.repository) : super(TransactionsState()) {
-    loadTransactions(); // Carga automática al inicializar
+    loadTransactions();
   }
 
   Future<void> loadTransactions() async {

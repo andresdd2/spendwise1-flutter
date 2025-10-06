@@ -17,18 +17,18 @@ class TotalsTransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 6, top: 20, right: 6, bottom: 20),
+      padding: const EdgeInsets.only(left: 8, top: 20, right: 8, bottom: 20),
       child: Container(
         decoration: BoxDecoration(
-          color: AppPalette.cComponent3,
-          borderRadius: BorderRadius.circular(18),
+          color: AppPalette.cComponent2,
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              blurRadius: 12,
-              offset: Offset(0, 2),
-              color: AppPalette.cComponent2
-            )
-          ]
+              blurRadius: 1,
+              offset: Offset(0, 8),
+              color: AppPalette.cComponent2,
+            ),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 30),

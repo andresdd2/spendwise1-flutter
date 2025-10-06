@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
+import 'package:spendwise_1/utils/string_extensions.dart';
 
 class ShowCategoryWidget extends StatelessWidget {
   final String id;
@@ -51,7 +52,7 @@ class ShowCategoryWidget extends StatelessWidget {
               const SizedBox(width: 25),
               Flexible(
                 child: Text(
-                  name,
+                  name.capitalizeFirst(),
                   style: TextStyle(
                     color: AppPalette.cText,
                     fontSize: 18,

@@ -3,10 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:spendwise_1/presentation/screens/account_screen.dart';
 import 'package:spendwise_1/presentation/screens/category_screen.dart';
 import 'package:spendwise_1/presentation/screens/home_screen.dart';
+import 'package:spendwise_1/presentation/screens/register_screen.dart';
 import 'package:spendwise_1/presentation/screens/transaction_screen.dart';
 import 'package:spendwise_1/presentation/widgets/shared/navigation_bar_widget.dart';
 
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouter = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   initialLocation: '/home',
   routes: [
     StatefulShellRoute.indexedStack(
@@ -48,6 +52,12 @@ final appRouter = GoRouter(
         ),
       ],
     ),
+
+    GoRoute(
+      path: '/register-screen',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const RegisterScreen(),
+    )
   ],
 );
 

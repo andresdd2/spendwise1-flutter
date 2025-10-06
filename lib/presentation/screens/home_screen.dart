@@ -45,6 +45,8 @@ class HomeScreen extends ConsumerWidget {
         ),
         centerTitle: false,
       ),
+
+      
       body: transactionsState.isLoading || totalsState.isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppPalette.cAccent),

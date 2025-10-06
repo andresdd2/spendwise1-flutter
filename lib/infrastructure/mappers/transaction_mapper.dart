@@ -20,7 +20,7 @@ class TransactionMapper {
 
   static TransactionModel toModel(Transaction entity) {
     return TransactionModel(
-      id: entity.id ?? '', // Proporcionar valor por defecto
+      id: entity.id ?? '',
       amount: entity.amount,
       description: entity.description,
       date: entity.date,
