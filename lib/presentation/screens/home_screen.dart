@@ -5,11 +5,11 @@ import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_pro
 import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
 import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
+import 'package:spendwise_1/presentation/widgets/shared/transaction_list.dart';
 import 'package:spendwise_1/presentation/widgets/transaction/daily_line_chart.dart';
 import 'package:spendwise_1/presentation/widgets/transaction/monthly_bar_chart.dart';
 import 'package:spendwise_1/presentation/widgets/transaction/totals_transaction_card.dart';
 import 'package:spendwise_1/utils/app_date_utils.dart';
-import 'package:spendwise_1/utils/formatters.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -217,48 +217,7 @@ class HomeScreen extends ConsumerWidget {
                 const SliverToBoxAdapter(child: SizedBox(height: 2)),
 
                 // Lista de transacciones
-                if (transactionsState.transactions.isEmpty)
-                  const SliverToBoxAdapter(
-                    child: Center(
-                      child: Text(
-                        'No hay transacciones para este mes',
-                        style: TextStyle(color: AppPalette.cText),
-                      ),
-                    ),
-                  )
-                else
-                  SliverList.separated(
-                    itemCount: transactionsState.transactions.length,
-                    itemBuilder: (context, index) {
-                      final t = transactionsState.transactions[index];
-                      return ListTile(
-                        title: Text(
-                          formatToCOP(t.amount),
-                          style: TextStyle(
-                            color: t.type == 'income'
-                                ? AppPalette.cAccent
-                                : Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        subtitle: Text(
-                          t.description,
-                          style: TextStyle(color: AppPalette.cText),
-                        ),
-                        trailing: Text(
-                          formatDate(t.date),
-                          style: TextStyle(
-                            color: AppPalette.cText,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
-                  ),
-                const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
+                const TransactionList(),
               ],
             ),
     );

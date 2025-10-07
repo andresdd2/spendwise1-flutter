@@ -108,7 +108,7 @@ class CategoryScreen extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Column(
-                          
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
                             // Gráfico de gastos
@@ -197,7 +197,7 @@ class CategoryScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 10)),
               ],
             ),
     );

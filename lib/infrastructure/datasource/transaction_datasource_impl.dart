@@ -24,9 +24,13 @@ class TransactionDatasourceImpl implements TransactionDatasource {
     : dio = Dio(BaseOptions(baseUrl: Environment.apiBaseUrl));
 
   @override
-  Future<List<Transaction>> getTransactions() async {
+  Future<List<Transaction>> getTransactions({int? limit}) async {
     try {
-      final response = await dio.get('/transaction');
+      String url = '/transaction';
+      if (limit != null) {
+        url += '?limit=$limit';
+      }
+      final response = await dio.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = response.data;
         final models = jsonList
@@ -136,23 +140,23 @@ class TransactionDatasourceImpl implements TransactionDatasource {
   @override
   Future<List<DailyTotals>> getDailyTotals(int year, int month) async {
     try {
-    final response = await dio.get(
-      '/transaction/totals/daily?year=$year&month=$month',
-    );
-    
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonList = response.data;
-      final models = jsonList
-          .map((json) => DailyTotalsModel.fromJson(json))
-          .toList();
-      return DailyTotalsMapper.toEntities(models);
-    } else {
-      throw Exception(
-        'Error al cargar los totales diarios: ${response.statusCode}',
+      final response = await dio.get(
+        '/transaction/totals/daily?year=$year&month=$month',
       );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = response.data;
+        final models = jsonList
+            .map((json) => DailyTotalsModel.fromJson(json))
+            .toList();
+        return DailyTotalsMapper.toEntities(models);
+      } else {
+        throw Exception(
+          'Error al cargar los totales diarios: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error en la petición de totales diarios: $e');
     }
-  } catch (e) {
-    throw Exception('Error en la petición de totales diarios: $e');
-  }
   }
 }

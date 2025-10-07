@@ -7,14 +7,14 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
   final TransactionRepository repository;
 
   TransactionsNotifier(this.repository) : super(TransactionsState()) {
-    loadTransactions();
+    loadTransactions(limit: 10);
   }
 
-  Future<void> loadTransactions() async {
+  Future<void> loadTransactions({int? limit}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final transactions = await repository.getTransactions();
+      final transactions = await repository.getTransactions(limit: limit);
       state = state.copyWith(transactions: transactions, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());

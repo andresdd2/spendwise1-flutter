@@ -12,8 +12,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
   TransactionRepositoryImpl({required this.datasource});
 
   @override
-  Future<List<Transaction>> getTransactions() async {
-    return await datasource.getTransactions();
+  Future<List<Transaction>> getTransactions({int? limit}) async {
+    return await datasource.getTransactions(limit: limit);
   }
 
   @override

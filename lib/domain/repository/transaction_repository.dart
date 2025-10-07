@@ -6,7 +6,7 @@ import 'package:spendwise_1/domain/entity/transaction.dart';
 
 abstract class TransactionRepository {
 
-  Future<List<Transaction>> getTransactions();
+  Future<List<Transaction>> getTransactions({int? limit});
   Future<Totals> getTotals(int year, int month);
   Future<List<TotalsByCategory>> getTotalsByCategory(int year, int month);
   Future<List<MonthlyTotals>> getMonthlyTotals(int year);
