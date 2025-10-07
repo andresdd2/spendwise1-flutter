@@ -1,14 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:spendwise_1/config/constants/Environment.dart';
 import 'package:spendwise_1/domain/datasource/transaction_datasource.dart';
+import 'package:spendwise_1/domain/entity/dailay_totals.dart';
 import 'package:spendwise_1/domain/entity/monthly_totals.dart';
 import 'package:spendwise_1/domain/entity/totals.dart';
 import 'package:spendwise_1/domain/entity/totals_by_category.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
+import 'package:spendwise_1/infrastructure/mappers/daily_totals_mapper.dart';
 import 'package:spendwise_1/infrastructure/mappers/monthly_totals_mapper.dart';
 import 'package:spendwise_1/infrastructure/mappers/totals_by_category_mapper.dart';
 import 'package:spendwise_1/infrastructure/mappers/totals_mapper.dart';
 import 'package:spendwise_1/infrastructure/mappers/transaction_mapper.dart';
+import 'package:spendwise_1/infrastructure/models/daily_totals_model.dart';
 import 'package:spendwise_1/infrastructure/models/monthly_totals_model.dart';
 import 'package:spendwise_1/infrastructure/models/totals_by_category_model.dart';
 import 'package:spendwise_1/infrastructure/models/totals_model.dart';
@@ -128,5 +131,28 @@ class TransactionDatasourceImpl implements TransactionDatasource {
     } catch (e) {
       throw Exception('Error en la petición de totales mensuales: $e');
     }
+  }
+
+  @override
+  Future<List<DailyTotals>> getDailyTotals(int year, int month) async {
+    try {
+    final response = await dio.get(
+      '/transaction/totals/daily?year=$year&month=$month',
+    );
+    
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = response.data;
+      final models = jsonList
+          .map((json) => DailyTotalsModel.fromJson(json))
+          .toList();
+      return DailyTotalsMapper.toEntities(models);
+    } else {
+      throw Exception(
+        'Error al cargar los totales diarios: ${response.statusCode}',
+      );
+    }
+  } catch (e) {
+    throw Exception('Error en la petición de totales diarios: $e');
+  }
   }
 }

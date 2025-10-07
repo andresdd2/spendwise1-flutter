@@ -1,4 +1,5 @@
 import 'package:spendwise_1/domain/datasource/transaction_datasource.dart';
+import 'package:spendwise_1/domain/entity/dailay_totals.dart';
 import 'package:spendwise_1/domain/entity/monthly_totals.dart';
 import 'package:spendwise_1/domain/entity/totals.dart';
 import 'package:spendwise_1/domain/entity/totals_by_category.dart';
@@ -33,5 +34,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<List<MonthlyTotals>> getMonthlyTotals(int year) async {
     return await datasource.getMonthlyTotals(year);
+  }
+
+  @override
+  Future<List<DailyTotals>> getDailyTotals(int year, int month) async {
+    return await datasource.getDailyTotals(year, month);
   }
 }
