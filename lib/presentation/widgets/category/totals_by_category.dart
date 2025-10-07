@@ -21,7 +21,7 @@ class TotalsByCategory extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: AppPalette.cComponent2,
+          color: AppPalette.cComponent4,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(

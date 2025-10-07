@@ -31,7 +31,7 @@ class ShowCategoryWidget extends StatelessWidget {
       padding: const EdgeInsets.only(left: 8, top: 16, bottom: 2, right: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: AppPalette.cComponent2,
+          color: AppPalette.cComponent4,
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(

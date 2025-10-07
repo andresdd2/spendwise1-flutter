@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
 import 'package:spendwise_1/presentation/providers/category/category_provider.dart';
 import 'package:spendwise_1/presentation/providers/totals_by_category.dart/totals_by_category_provider.dart';
+import 'package:spendwise_1/presentation/widgets/category/category_pie_chart.dart';
 import 'package:spendwise_1/presentation/widgets/category/show_category_widget.dart';
 import 'package:spendwise_1/presentation/widgets/category/totals_by_category.dart';
 import 'package:spendwise_1/utils/app_date_utils.dart';
@@ -20,7 +21,8 @@ class CategoryScreen extends ConsumerWidget {
       totalsByCategoryProvider((year: year, month: month)),
     );
 
-    final isLoading = categoriesAsync.isLoading || totalsByCategoryAsync.isLoading;
+    final isLoading =
+        categoriesAsync.isLoading || totalsByCategoryAsync.isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,13 +38,14 @@ class CategoryScreen extends ConsumerWidget {
         ),
         centerTitle: false,
       ),
+
       body: isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppPalette.cAccent),
             )
           : CustomScrollView(
               slivers: [
-                // Grid de categorías
+                
                 categoriesAsync.when(
                   data: (categories) {
                     if (categories.isEmpty) {
@@ -94,14 +97,67 @@ class CategoryScreen extends ConsumerWidget {
                       const SliverToBoxAdapter(child: SizedBox.shrink()),
                 ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+                totalsByCategoryAsync.when(
+                  data: (totals) {
+                    if (totals.isEmpty) {
+                      return const SliverToBoxAdapter(child: SizedBox.shrink());
+                    }
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          
+                          children: [
+
+                            // Gráfico de gastos
+                            const Text(
+                              'Distribución de Gastos',
+                              style: TextStyle(
+                                color: AppPalette.cText,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            CategoryPieChart(data: totals, showExpenses: true),
+                            const SizedBox(height: 50),
+
+                            // Gráfico de ingresos
+                            const Text(
+                              'Distribución de Ingresos',
+                              style: TextStyle(
+                                color: AppPalette.cText,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            CategoryPieChart(data: totals, showExpenses: false),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  loading: () =>
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  error: (error, stack) =>
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 30)),
 
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(left: 15, bottom: 10),
                     child: Text(
-                      'Gastos por categorías',
-                      style: TextStyle(color: AppPalette.cText, fontSize: 23, fontWeight: FontWeight.bold),
+                      'Detalle por categorías',
+                      style: TextStyle(
+                        color: AppPalette.cText,
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -141,8 +197,7 @@ class CategoryScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-
-                const SliverPadding(padding: EdgeInsets.only(bottom: 8)),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
               ],
             ),
     );
