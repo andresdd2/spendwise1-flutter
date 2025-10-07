@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
+import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
 import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
+import 'package:spendwise_1/presentation/widgets/transaction/monthly_bar_chart.dart';
 import 'package:spendwise_1/presentation/widgets/transaction/totals_transaction_card.dart';
 import 'package:spendwise_1/utils/app_date_utils.dart';
 import 'package:spendwise_1/utils/formatters.dart';
@@ -16,6 +18,7 @@ class HomeScreen extends ConsumerWidget {
     final month = AppDateUtils.getCurrentMonth();
 
     final transactionsState = ref.watch(transactionsProvider);
+    final monthlyTotalsAsync = ref.watch(monthlyTotalsProvider(year));
     final totalsState = ref.watch(totalsProvider((year, month)));
 
     return Scaffold(
@@ -102,6 +105,65 @@ class HomeScreen extends ConsumerWidget {
                         )
                       : const SizedBox.shrink(),
                 ),
+
+                // Gráfico de barras mensuales
+                SliverToBoxAdapter(
+                  child: monthlyTotalsAsync.when(
+                    data: (totals) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Resumen Anual',
+                              style: TextStyle(
+                                color: AppPalette.cText,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            MonthlyBarChart(data: totals),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      );
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppPalette.cAccent,
+                        ),
+                      ),
+                    ),
+                    error: (error, stack) => Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Error al cargar estadísticas: $error',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 16, bottom: 10),
+                    child: Text(
+                      'Últimas transacciones del mes',
+                      style: TextStyle(
+                        color: AppPalette.cText,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+
+
                 SliverToBoxAdapter(child: const SizedBox(height: 16)),
                 if (transactionsState.transactions.isEmpty)
                   const SliverToBoxAdapter(
