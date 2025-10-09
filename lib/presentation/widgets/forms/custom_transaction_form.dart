@@ -80,19 +80,21 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
     });
   }
 
-  Future<void> _invalidateProviders(int year, int month, Transaction transaction) async {
-    ref.refresh(totalsProvider((year, month)));
-    ref.refresh(dailyTotalsProvider((year: year, month: month)));
-    ref.refresh(totalsByCategoryProvider((year: year, month: month)));
-    ref.refresh(monthlyTotalsProvider(year));
+  Future<void> _invalidateProviders(
+    int year,
+    int month,
+    Transaction transaction,
+  ) async {
+    // USA INVALIDATE en lugar de REFRESH
+    ref.invalidate(totalsProvider((year, month)));
+    ref.invalidate(dailyTotalsProvider((year: year, month: month)));
+    ref.invalidate(totalsByCategoryProvider);
+    ref.invalidate(monthlyTotalsProvider(year));
 
-    await ref
-        .read(transactionsProvider.notifier)
-        .loadTransactions();
-    ref.refresh(transactionsProvider);
+    await ref.read(transactionsProvider.notifier).loadTransactions();
 
     if (transaction.id.isNotEmpty) {
-      ref.refresh(transactionByIdProvider(transaction.id));
+      ref.invalidate(transactionByIdProvider(transaction.id));
     }
   }
 
@@ -207,9 +209,7 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                 return null;
               },
             ),
-
             const SizedBox(height: 30),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -251,15 +251,19 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                         final origMonth = originalDate!.month;
 
                         if (origYear != year || origMonth != month) {
-                          await _invalidateProviders(origYear, origMonth, transaction);
+                          await _invalidateProviders(
+                            origYear,
+                            origMonth,
+                            transaction,
+                          );
                         }
 
                         if (origYear != year) {
-                          ref.refresh(
-                            monthlyTotalsProvider(origYear),
-                          ); // Cambia a refresh
+                          ref.invalidate(monthlyTotalsProvider(origYear));
                         }
                       }
+
+                      if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -268,7 +272,6 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                         ),
                       );
 
-                      // Cambia el manejo post-submit
                       Navigator.of(context).pop();
                     } catch (e) {
                       if (!context.mounted) return;

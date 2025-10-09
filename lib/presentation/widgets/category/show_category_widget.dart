@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
 import 'package:spendwise_1/utils/string_extensions.dart';
 
-class ShowCategoryWidget extends StatelessWidget {
+class ShowCategoryWidget extends ConsumerWidget {
   final String id;
   final String name;
 
-  const ShowCategoryWidget({super.key, required this.id, required this.name});
+  const ShowCategoryWidget({
+    super.key,
+    required this.id,
+    required this.name,
+  });
 
   IconData _getCategoryIcon(String categoryName) {
     final lowerName = categoryName.toLowerCase();
-
     if (lowerName.contains('entretenimiento')) {
       return Icons.movie_rounded;
-    } else if (lowerName.contains('salud') ||
-        lowerName.contains('medicamento')) {
+    } else if (lowerName.contains('salud') || lowerName.contains('medicamento')) {
       return Icons.medical_services_rounded;
     } else if (lowerName.contains('servicio')) {
       return Icons.build_rounded;
@@ -26,7 +29,7 @@ class ShowCategoryWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 16, bottom: 2, right: 8),
       child: Container(
@@ -38,17 +41,21 @@ class ShowCategoryWidget extends StatelessWidget {
               color: Colors.black.withAlpha(6),
               spreadRadius: 2,
               blurRadius: 6,
-              offset: const Offset(0, 3)
-            )
-          ]
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(_getCategoryIcon(name), color: AppPalette.cAccent, size: 18),
+              Icon(
+                _getCategoryIcon(name),
+                color: AppPalette.cAccent,
+                size: 18,
+              ),
               const SizedBox(width: 25),
               Flexible(
                 child: Text(
@@ -56,7 +63,7 @@ class ShowCategoryWidget extends StatelessWidget {
                   style: TextStyle(
                     color: AppPalette.cText,
                     fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
