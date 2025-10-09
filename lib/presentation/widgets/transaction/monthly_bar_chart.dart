@@ -78,12 +78,12 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
   }
 
   double _getMaxY() {
-    double maxValue = 0;
+    double maxValue = 0.0; // Cambiado a double literal
     for (var monthData in widget.data) {
       if (monthData.income > maxValue) maxValue = monthData.income;
       if (monthData.expense > maxValue) maxValue = monthData.expense;
     }
-    
+
     return maxValue * 1.2;
   }
 
@@ -98,7 +98,10 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
       );
     }
 
-    final maxY = _getMaxY();
+    final double rawMaxY = _getMaxY(); // Explícitamente double
+    final double effectiveMaxY = rawMaxY > 0
+        ? rawMaxY
+        : 100000.0; // Fallback como double
 
     return Column(
       children: [
@@ -121,7 +124,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
             padding: const EdgeInsets.only(right: 16, top: 16),
             child: BarChart(
               BarChartData(
-                maxY: maxY > 0 ? maxY : 100000,
+                maxY: effectiveMaxY,
                 minY: 0,
                 barGroups: _buildBarGroups(),
                 barTouchData: BarTouchData(
@@ -199,7 +202,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                             ),
                           );
                         }
-                        
+
                         String formattedValue;
                         if (value >= 1000000) {
                           formattedValue =
@@ -230,7 +233,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: maxY / 5,
+                  horizontalInterval: effectiveMaxY / 5,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: AppPalette.cComponent3,

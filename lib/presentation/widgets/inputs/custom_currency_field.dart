@@ -8,7 +8,7 @@ class CustomCurrencyField extends StatelessWidget {
   final String? hintText;
   final String? errorMessage;
   final Function(String?)?
-  onChanged; // Cambiado de Function(double)? a Function(String?)?
+  onChanged;
   final String? Function(String?)? validator;
   final TextEditingController? controller;
 
@@ -39,7 +39,7 @@ class CustomCurrencyField extends StatelessWidget {
         fontWeight: FontWeight.w500,
       ),
       cursorColor: Colors.black,
-      onChanged: onChanged, // Ahora pasa directamente el String
+      onChanged: onChanged, // Ahora se pasa directamente el String
       validator: validator,
       decoration: InputDecoration(
         enabledBorder: border.copyWith(

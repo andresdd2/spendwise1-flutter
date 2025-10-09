@@ -51,4 +51,19 @@ class TransactionRepositoryImpl implements TransactionRepository {
   ) async {
     return await datasource.getTransactionsByDateRange(startDate, endDate);
   }
+  
+  @override
+  Future<String> deleteTransaction(String id) async {
+    return await datasource.deleteTransaction(id);
+  }
+  
+  @override
+  Future<String> updateTransaction(String id, Transaction transaction) async {
+    return await datasource.updateTransaction(id, transaction);
+  }
+
+  @override
+  Future<Transaction> getTransactionById(String id) {
+    return datasource.getTransactionById(id);
+  }
 }

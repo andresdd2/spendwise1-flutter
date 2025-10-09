@@ -53,33 +53,29 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
     }
   }
 
-  Future<void> updateTransaction(Transaction transaction) async {
+  Future<String> updateTransaction(String id, Transaction transaction) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      // await repository.updateTransaction(transaction);
-
-      final updatedList = state.transactions.map((t) {
-        return t.id == transaction.id ? transaction : t;
-      }).toList();
-
-      state = state.copyWith(transactions: updatedList);
+      final message = await repository.updateTransaction(id, transaction);
       await loadTransactions();
+      state = state.copyWith(isLoading: false);
+      return message;
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-      rethrow;
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      throw Exception(e);
     }
   }
 
-  Future<void> deleteTransaction(String id) async {
+  Future<String> deleteTransaction(String id) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      // await repository.deleteTransaction(id);
-
-      final updatedList = state.transactions.where((t) => t.id != id).toList();
-      state = state.copyWith(transactions: updatedList);
-
+      final message = await repository.deleteTransaction(id);
       await loadTransactions();
+      state = state.copyWith(isLoading: false);
+      return message;
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-      rethrow;
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      throw Exception(e);
     }
   }
 }

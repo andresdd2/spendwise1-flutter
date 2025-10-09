@@ -6,6 +6,7 @@ class CustomTextAreaField extends StatelessWidget {
   final String? hintText;
   final String? errorMessage;
   final String? initialValue;
+  final TextEditingController? controller;
   final Function(String)? onChanged;
   final String? Function(String?)? validator;
   final int maxLines;
@@ -19,6 +20,7 @@ class CustomTextAreaField extends StatelessWidget {
     this.onChanged,
     this.validator,
     this.initialValue,
+    this.controller,
     this.maxLines = 5,
     this.maxLength,
   });
@@ -28,16 +30,17 @@ class CustomTextAreaField extends StatelessWidget {
     final border = OutlineInputBorder(borderRadius: BorderRadius.circular(15));
 
     return TextFormField(
+      controller: controller,
       onChanged: onChanged,
       validator: validator,
-      initialValue: initialValue,
+      initialValue: controller == null ? initialValue : null,
       maxLines: maxLines,
       maxLength: maxLength,
       style: TextStyle(color: AppPalette.grisClaro),
       cursorColor: AppPalette.grisClaro,
       decoration: InputDecoration(
         enabledBorder: border.copyWith(
-          borderSide: BorderSide(color:   AppPalette.grisClaro),
+          borderSide: BorderSide(color: AppPalette.grisClaro),
         ),
         focusedBorder: border.copyWith(
           borderSide: BorderSide(color: AppPalette.grisClaro),

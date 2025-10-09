@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
 import 'package:spendwise_1/presentation/providers/category/category_provider.dart';
+import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_provider.dart';
+import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
+import 'package:spendwise_1/presentation/providers/totals_by_category.dart/totals_by_category_provider.dart';
 import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
 import 'package:spendwise_1/presentation/widgets/inputs/custom_currency_field.dart';
@@ -12,7 +15,9 @@ import 'package:spendwise_1/presentation/widgets/inputs/custom_text_area_field.d
 import 'package:spendwise_1/utils/currency_input_formatter.dart';
 
 class CustomTransactionForm extends ConsumerStatefulWidget {
-  const CustomTransactionForm({super.key});
+  final Transaction? transactionToEdit;
+
+  const CustomTransactionForm({super.key, this.transactionToEdit});
 
   @override
   ConsumerState<CustomTransactionForm> createState() =>
@@ -22,10 +27,74 @@ class CustomTransactionForm extends ConsumerStatefulWidget {
 class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
   String? selectedCategoryId;
   DateTime? selectedDate;
+  DateTime? originalDate;
   double? amount;
   String? selectedType;
   String description = '';
   final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.transactionToEdit != null) {
+      _initializeEditMode();
+    }
+  }
+
+  void _initializeEditMode() {
+    final transaction = widget.transactionToEdit!;
+    selectedCategoryId = transaction.category.id;
+    selectedDate = transaction.date;
+    amount = transaction.amount;
+    selectedType = transaction.type;
+    description = transaction.description;
+
+    originalDate = transaction.date;
+
+    _amountController.text = formatCurrencyValue(transaction.amount);
+    _descriptionController.text = transaction.description;
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  bool get isEditMode => widget.transactionToEdit != null;
+
+  void _resetForm() {
+    _formKey.currentState!.reset();
+    _amountController.clear();
+    _descriptionController.clear();
+    setState(() {
+      selectedCategoryId = null;
+      selectedDate = null;
+      amount = null;
+      selectedType = null;
+      description = '';
+    });
+  }
+
+  Future<void> _invalidateProviders(int year, int month, Transaction transaction) async {
+    ref.refresh(totalsProvider((year, month)));
+    ref.refresh(dailyTotalsProvider((year: year, month: month)));
+    ref.refresh(totalsByCategoryProvider((year: year, month: month)));
+    ref.refresh(monthlyTotalsProvider(year));
+
+    await ref
+        .read(transactionsProvider.notifier)
+        .loadTransactions();
+    ref.refresh(transactionsProvider);
+
+    if (transaction.id.isNotEmpty) {
+      ref.refresh(transactionByIdProvider(transaction.id));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +109,7 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
             CustomCurrencyField(
               label: 'Monto',
               hintText: 'Ingresa el monto',
+              controller: _amountController,
               onChanged: (value) {
                 amount = parseCurrencyValue(value ?? '0');
               },
@@ -61,6 +131,7 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
               hintText: 'Escribe una descripción detallada...',
               maxLines: 5,
               maxLength: 500,
+              controller: _descriptionController,
               onChanged: (value) => description = value ?? '',
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -136,7 +207,9 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                 return null;
               },
             ),
+
             const SizedBox(height: 30),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -148,45 +221,64 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                     final category = categories.firstWhere(
                       (cat) => cat.id == selectedCategoryId,
                     );
-              
-                    final newTransaction = Transaction(
-                      id: '',
+
+                    final transaction = Transaction(
+                      id: isEditMode ? widget.transactionToEdit!.id : '',
                       amount: amount!,
                       description: description,
                       date: selectedDate!,
                       category: category,
                       type: selectedType!,
                     );
-              
+
                     try {
-                      final message = await ref
-                          .read(transactionsProvider.notifier)
-                          .addTransaction(newTransaction);
-              
+                      final message = isEditMode
+                          ? await ref
+                                .read(transactionsProvider.notifier)
+                                .updateTransaction(transaction.id, transaction)
+                          : await ref
+                                .read(transactionsProvider.notifier)
+                                .addTransaction(transaction);
+
                       if (!context.mounted) return;
-              
+
                       final year = selectedDate!.year;
                       final month = selectedDate!.month;
-                      ref.invalidate(totalsProvider((year, month)));
-              
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(message)));
-              
-                      _formKey.currentState!.reset();
-                      setState(() {
-                        selectedCategoryId = null;
-                        selectedDate = null;
-                        amount = null;
-                        selectedType = null;
-                        description = '';
-                      });
+                      await _invalidateProviders(year, month, transaction);
+
+                      if (isEditMode && originalDate != null) {
+                        final origYear = originalDate!.year;
+                        final origMonth = originalDate!.month;
+
+                        if (origYear != year || origMonth != month) {
+                          await _invalidateProviders(origYear, origMonth, transaction);
+                        }
+
+                        if (origYear != year) {
+                          ref.refresh(
+                            monthlyTotalsProvider(origYear),
+                          ); // Cambia a refresh
+                        }
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(message),
+                          backgroundColor: AppPalette.cAccent,
+                        ),
+                      );
+
+                      // Cambia el manejo post-submit
+                      Navigator.of(context).pop();
                     } catch (e) {
                       if (!context.mounted) return;
-              
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $e'),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
                     }
                   }
                 },
@@ -194,7 +286,13 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                   backgroundColor: AppPalette.cAccent,
                   foregroundColor: AppPalette.cText,
                 ),
-                child: const Text('Registrar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),),
+                child: Text(
+                  isEditMode ? 'Actualizar' : 'Registrar',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                  ),
+                ),
               ),
             ),
           ],

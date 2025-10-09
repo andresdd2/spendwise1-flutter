@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
+import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_provider.dart';
+import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
+import 'package:spendwise_1/presentation/providers/totals_by_category.dart/totals_by_category_provider.dart';
+import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
 import 'package:spendwise_1/utils/formatters.dart';
 
@@ -11,8 +15,31 @@ class TransactionDetail extends ConsumerWidget {
 
   const TransactionDetail({super.key, required this.transaction});
 
+Future<void> _invalidateProviders(WidgetRef ref, int year, int month) async {
+    ref.refresh(totalsProvider((year, month)));
+    ref.refresh(dailyTotalsProvider((year: year, month: month)));
+    ref.refresh(totalsByCategoryProvider((year: year, month: month)));
+    ref.refresh(monthlyTotalsProvider(year));
+
+    await ref.read(transactionsProvider.notifier).loadTransactions(); 
+    ref.refresh(transactionsProvider);
+
+    ref.refresh(transactionByIdProvider(transaction.id));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final transactionsState = ref.watch(transactionsProvider);
+
+    Transaction currentTransaction;
+    try {
+      currentTransaction = transactionsState.transactions.firstWhere(
+        (t) => t.id == transaction.id,
+      );
+    } catch (_) {
+      currentTransaction = transaction;
+    }
+
     final isIncome = transaction.type == 'income';
 
     return Scaffold(
@@ -31,15 +58,14 @@ class TransactionDetail extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Icono circular
               Center(
                 child: Container(
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
                     color: isIncome
-                        ? AppPalette.cAccent.withOpacity(0.15)
-                        : Colors.redAccent.withOpacity(0.15),
+                        ? AppPalette.cAccent.withAlpha(15)
+                        : Colors.redAccent.withAlpha(15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -52,10 +78,9 @@ class TransactionDetail extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
-              // Descripción
               Center(
                 child: Text(
-                  transaction.description,
+                  currentTransaction.description,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -67,10 +92,9 @@ class TransactionDetail extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              // Monto
               Center(
                 child: Text(
-                  formatToCOP(transaction.amount),
+                  formatToCOP(currentTransaction.amount),
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
@@ -81,20 +105,18 @@ class TransactionDetail extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              // Fecha
               Center(
                 child: Text(
-                  formatDate(transaction.date),
+                  formatDate(currentTransaction.date),
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppPalette.cText.withOpacity(0.7),
+                    color: AppPalette.cText.withAlpha(7),
                   ),
                 ),
               ),
 
               const SizedBox(height: 32),
 
-              // Tipo (chip)
               Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -103,8 +125,8 @@ class TransactionDetail extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isIncome
-                        ? AppPalette.cAccent.withOpacity(0.15)
-                        : Colors.redAccent.withOpacity(0.15),
+                        ? AppPalette.cAccent.withAlpha(15)
+                        : Colors.redAccent.withAlpha(15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -120,30 +142,20 @@ class TransactionDetail extends ConsumerWidget {
 
               const SizedBox(height: 40),
 
-              // Detalles adicionales
-              _DetailRow(label: 'Categoría', value: transaction.category.name),
+              _DetailRow(label: 'Categoría', value: currentTransaction.category.name),
 
               const SizedBox(height: 16),
 
-              _DetailRow(label: 'ID', value: transaction.id),
+              _DetailRow(label: 'ID', value: currentTransaction.id),
 
               const SizedBox(height: 40),
 
-              // Botones de acción
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        // TODO: Implementar actualización
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              'Función de actualizar en desarrollo',
-                            ),
-                            backgroundColor: AppPalette.cAccent,
-                          ),
-                        );
+                        context.push('/register-screen', extra: transaction);
                       },
                       icon: const Icon(Icons.edit_outlined),
                       label: const Text('Actualizar'),
@@ -164,15 +176,19 @@ class TransactionDetail extends ConsumerWidget {
                         final confirm = await _showDeleteDialog(context);
                         if (confirm == true) {
                           try {
-                            await ref
+                            final message = await ref
                                 .read(transactionsProvider.notifier)
-                                .deleteTransaction(transaction.id);
+                                .deleteTransaction(currentTransaction.id);
 
                             if (context.mounted) {
+                              final year = currentTransaction.date.year;
+                              final month = transaction.date.month;
+                              await _invalidateProviders(ref, year, month);
+
                               context.pop();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Transacción eliminada'),
+                                SnackBar(
+                                  content: Text(message),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -226,7 +242,7 @@ class TransactionDetail extends ConsumerWidget {
         ),
         content: Text(
           'Esta acción no se puede deshacer.',
-          style: TextStyle(color: AppPalette.cText.withOpacity(0.7)),
+          style: TextStyle(color: AppPalette.cText.withAlpha(7)),
         ),
         actions: [
           TextButton(
@@ -258,7 +274,7 @@ class _DetailRow extends StatelessWidget {
         color: AppPalette.cBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppPalette.cText.withOpacity(0.1),
+          color: AppPalette.cText.withAlpha(1),
           width: 1.5,
         ),
       ),
@@ -269,7 +285,7 @@ class _DetailRow extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: AppPalette.cText.withOpacity(0.6),
+              color: AppPalette.cText.withAlpha(6),
               fontWeight: FontWeight.w500,
             ),
           ),

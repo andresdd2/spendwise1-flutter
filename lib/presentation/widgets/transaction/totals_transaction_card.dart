@@ -26,7 +26,7 @@ class TotalsTransactionCard extends StatelessWidget {
             BoxShadow(
               blurRadius: 1,
               offset: Offset(0, 8),
-              color: AppPalette.cComponent2,
+              color: AppPalette.cComponent4,
             ),
           ],
         ),

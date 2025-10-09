@@ -16,4 +16,7 @@ abstract class TransactionRepository {
     DateTime endDate,
   );
   Future<String> createTransaction(Transaction transaction);
+  Future<String> updateTransaction(String id, Transaction transaction);
+  Future<String> deleteTransaction(String id);
+  Future<Transaction> getTransactionById(String id);
 }

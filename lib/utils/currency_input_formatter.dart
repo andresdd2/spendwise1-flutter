@@ -17,16 +17,12 @@ class CurrencyInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     String digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
     if (digitsOnly.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     double value = double.parse(digitsOnly);
     String formatted = _formatter.format(value);
-
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
@@ -34,11 +30,24 @@ class CurrencyInputFormatter extends TextInputFormatter {
   }
 }
 
+/// Parsea un string con formato de moneda y devuelve el valor numérico
+/// Ejemplo: "$312.000" -> 312000.0
 double parseCurrencyValue(String formattedValue) {
   if (formattedValue.isEmpty) return 0.0;
-
   String digitsOnly = formattedValue.replaceAll(RegExp(r'[^\d]'), '');
   if (digitsOnly.isEmpty) return 0.0;
-
   return double.parse(digitsOnly);
+}
+
+/// Formatea un valor numérico a string con formato de moneda
+/// Ejemplo: 312000.0 -> "$312.000"
+String formatCurrencyValue(double amount) {
+  final intAmount = amount.toInt();
+  final formatter = NumberFormat.currency(
+    locale: 'es_CO',
+    symbol: '\$',
+    decimalDigits: 0,
+    customPattern: '\u00A4#,##0',
+  );
+  return formatter.format(intAmount);
 }

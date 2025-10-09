@@ -45,7 +45,6 @@ class CategoryScreen extends ConsumerWidget {
             )
           : CustomScrollView(
               slivers: [
-                
                 categoriesAsync.when(
                   data: (categories) {
                     if (categories.isEmpty) {
@@ -110,7 +109,6 @@ class CategoryScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
                             // Gráfico de gastos
                             const Text(
                               'Distribución de Gastos',
@@ -140,10 +138,21 @@ class CategoryScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  loading: () =>
-                      const SliverToBoxAdapter(child: SizedBox.shrink()),
-                  error: (error, stack) =>
-                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  loading: () => SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppPalette.cAccent,
+                      ),
+                    ),
+                  ),
+                  error: (error, stack) => SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(
+                        'Error al cargar totales: $error',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
                 ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 30)),
@@ -186,8 +195,13 @@ class CategoryScreen extends ConsumerWidget {
                       },
                     );
                   },
-                  loading: () =>
-                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  loading: () => SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppPalette.cAccent,
+                      ),
+                    ),
+                  ),
                   error: (error, stack) => SliverToBoxAdapter(
                     child: Center(
                       child: Text(

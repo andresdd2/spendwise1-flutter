@@ -92,7 +92,7 @@ class _DailyLineChartState extends State<DailyLineChart> {
             child: LineChart(
               LineChartData(
                 minX: 0,
-                maxX: widget.data.length > 0
+                maxX: widget.data.length > 1
                     ? widget.data.length.toDouble() - 1
                     : 30,
                 minY: 0,
@@ -106,6 +106,9 @@ class _DailyLineChartState extends State<DailyLineChart> {
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         final index = spot.x.toInt();
+                        if (index < 0 || index >= widget.data.length) {
+                          return null;
+                        }
                         final day = widget.data[index].day;
                         final value = spot.y;
                         final isIncome = spot.barIndex == 0;
@@ -131,8 +134,10 @@ class _DailyLineChartState extends State<DailyLineChart> {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: true,
-                  horizontalInterval: maxY / 5,
-                  verticalInterval: widget.data.length / 6,
+                  horizontalInterval: maxY > 0 ? maxY / 5 : 20000,
+                  verticalInterval: widget.data.length > 6
+                      ? widget.data.length / 6
+                      : 5,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: AppPalette.cComponent3.withOpacity(0.3),
@@ -152,7 +157,9 @@ class _DailyLineChartState extends State<DailyLineChart> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: widget.data.length / 6,
+                      interval: widget.data.length > 6
+                          ? widget.data.length / 6
+                          : 5,
                       getTitlesWidget: (value, meta) {
                         if (value.toInt() >= 0 &&
                             value.toInt() < widget.data.length) {
@@ -179,7 +186,7 @@ class _DailyLineChartState extends State<DailyLineChart> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 60,
-                      interval: maxY / 5,
+                      interval: maxY > 0 ? maxY / 5 : 20000,
                       getTitlesWidget: (value, meta) {
                         if (value == 0) {
                           return const Text(

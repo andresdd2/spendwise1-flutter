@@ -96,6 +96,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: AppPalette.cBackground,
         backgroundColor: AppPalette.cBackground,
         title: Text(
           'Transacción',
@@ -108,6 +109,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
         centerTitle: false,
         actions: [
           IconButton(
+            color: AppPalette.cAccent,
             tooltip: 'Agregar',
             onPressed: () => context.push('/register-screen'),
             icon: const Icon(Icons.add_outlined),

@@ -190,4 +190,60 @@ class TransactionDatasourceImpl implements TransactionDatasource {
       throw Exception('Error en la petición por rango de fechas: $e');
     }
   }
+
+  @override
+  Future<String> deleteTransaction(String id) async {
+    try {
+      final response = await dio.delete('/transaction/$id');
+
+      if (response.statusCode == 200) {
+        final message = response.data['message'] as String;
+        return message;
+      } else {
+        throw Exception(
+          'Error al eliminar la transacción: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error en la petición de eliminación: $e');
+    }
+  }
+
+  @override
+  Future<String> updateTransaction(String id, Transaction transaction) async {
+    try {
+      final model = TransactionMapper.toModel(transaction);
+      final requestBody = model.toCreateJson();
+      final response = await dio.patch('/transaction/$id', data: requestBody);
+
+      if (response.statusCode == 200) {
+        final message = response.data['message'] as String;
+        return message;
+      } else {
+        throw Exception(
+          'Error al actualizar la transacción: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error en la petición de actualización: $e');
+    }
+  }
+
+  @override
+  Future<Transaction> getTransactionById(String id) async {
+    try {
+      final response = await dio.get('/transaction/$id');
+      if (response.statusCode == 200) {
+        final json = response.data as Map<String, dynamic>;
+        final model = TransactionModel.fromJson(json);
+        return TransactionMapper.toEntity(model);
+      } else {
+        throw Exception(
+          'Error al cargar la transacción: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error en la petición: $e');
+    }
+  }
 }

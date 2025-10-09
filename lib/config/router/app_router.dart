@@ -57,8 +57,10 @@ final appRouter = GoRouter(
 
     GoRoute(
       path: '/register-screen',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const RegisterScreen(),
+      builder: (context, state) {
+        final transaction = state.extra as Transaction?;
+        return RegisterScreen(transactionToEdit: transaction);
+      },
     ),
     GoRoute(
       path: '/transaction-detail',
