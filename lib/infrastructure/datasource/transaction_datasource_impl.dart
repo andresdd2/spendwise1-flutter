@@ -159,4 +159,35 @@ class TransactionDatasourceImpl implements TransactionDatasource {
       throw Exception('Error en la petición de totales diarios: $e');
     }
   }
+
+  @override
+  Future<List<Transaction>> getTransactionsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final startDateStr =
+          '${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
+      final endDateStr =
+          '${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
+
+      final response = await dio.get(
+        '/transaction?startDate=$startDateStr&endDate=$endDateStr',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = response.data;
+        final models = jsonList
+            .map((json) => TransactionModel.fromJson(json))
+            .toList();
+        return TransactionMapper.toEntities(models);
+      } else {
+        throw Exception(
+          'Error al cargar transacciones por rango: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error en la petición por rango de fechas: $e');
+    }
+  }
 }

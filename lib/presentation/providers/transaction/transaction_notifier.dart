@@ -21,6 +21,22 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
     }
   }
 
+  Future<void> loadTransactionsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final transactions = await repository.getTransactionsByDateRange(
+        startDate,
+        endDate,
+      );
+      state = state.copyWith(transactions: transactions, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
   Future<String> addTransaction(Transaction transaction) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {

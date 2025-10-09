@@ -27,7 +27,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<List<TotalsByCategory>> getTotalsByCategory(int year, int month) async {
+  Future<List<TotalsByCategory>> getTotalsByCategory(
+    int year,
+    int month,
+  ) async {
     return await datasource.getTotalsByCategory(year, month);
   }
 
@@ -39,5 +42,13 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<List<DailyTotals>> getDailyTotals(int year, int month) async {
     return await datasource.getDailyTotals(year, month);
+  }
+
+  @override
+  Future<List<Transaction>> getTransactionsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    return await datasource.getTransactionsByDateRange(startDate, endDate);
   }
 }

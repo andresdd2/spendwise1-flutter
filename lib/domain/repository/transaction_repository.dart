@@ -11,5 +11,9 @@ abstract class TransactionRepository {
   Future<List<TotalsByCategory>> getTotalsByCategory(int year, int month);
   Future<List<MonthlyTotals>> getMonthlyTotals(int year);
   Future<List<DailyTotals>> getDailyTotals(int year, int month);
+  Future<List<Transaction>> getTransactionsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  );
   Future<String> createTransaction(Transaction transaction);
 }
