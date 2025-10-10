@@ -15,11 +15,11 @@ class TransactionItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppPalette.cBackground.withOpacity(0.8),
+          color: AppPalette.cBackground.withAlpha(8),
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(5),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -44,7 +44,7 @@ class TransactionItem extends StatelessWidget {
                   Text(
                     formatDate(transaction.date),
                     style: TextStyle(
-                      color: AppPalette.cText.withOpacity(0.7),
+                      color: AppPalette.cText,
                       fontSize: 14,
                     ),
                   ),

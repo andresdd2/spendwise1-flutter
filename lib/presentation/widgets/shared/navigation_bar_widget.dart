@@ -45,16 +45,12 @@ class NavigationBarWidget extends StatelessWidget {
             label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Icons.category_outlined),
-            label: 'Categorias',
-          ),
-          NavigationDestination(
             icon: Icon(Icons.add_outlined),
             label: 'Transacción',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_2_outlined),
-            label: 'Cuenta',
+            label: 'Otros',
           ),
         ],
       ),

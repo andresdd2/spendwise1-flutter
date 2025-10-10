@@ -78,7 +78,7 @@ class _MonthlyBarChartState extends State<MonthlyBarChart> {
   }
 
   double _getMaxY() {
-    double maxValue = 0.0; // Cambiado a double literal
+    double maxValue = 0.0;
     for (var monthData in widget.data) {
       if (monthData.income > maxValue) maxValue = monthData.income;
       if (monthData.expense > maxValue) maxValue = monthData.expense;

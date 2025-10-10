@@ -5,7 +5,6 @@ import 'package:spendwise_1/config/theme/app_palette.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
 import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
-import 'package:spendwise_1/presentation/providers/totals_by_category.dart/totals_by_category_provider.dart';
 import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
 import 'package:spendwise_1/utils/formatters.dart';
@@ -18,7 +17,6 @@ class TransactionDetail extends ConsumerWidget {
 Future<void> _invalidateProviders(WidgetRef ref, int year, int month) async {
     ref.refresh(totalsProvider((year, month)));
     ref.refresh(dailyTotalsProvider((year: year, month: month)));
-    ref.refresh(totalsByCategoryProvider((year: year, month: month)));
     ref.refresh(monthlyTotalsProvider(year));
 
     await ref.read(transactionsProvider.notifier).loadTransactions(); 
@@ -189,7 +187,7 @@ Future<void> _invalidateProviders(WidgetRef ref, int year, int month) async {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(message),
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppPalette.cAccent,
                                 ),
                               );
                             }

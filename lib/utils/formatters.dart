@@ -10,7 +10,8 @@ String formatToCOP(double amount) {
   return formatter.format(amount);
 }
 
-String formatDate(DateTime date) {
+String formatDate(DateTime? date) {
+  if (date == null) return 'Fecha no disponible';
   final formatter = DateFormat('d MMM yyyy', 'es');
   return formatter.format(date);
 }

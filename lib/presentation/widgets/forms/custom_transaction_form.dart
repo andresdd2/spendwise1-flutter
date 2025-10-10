@@ -5,7 +5,6 @@ import 'package:spendwise_1/domain/entity/transaction.dart';
 import 'package:spendwise_1/presentation/providers/category/category_provider.dart';
 import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
-import 'package:spendwise_1/presentation/providers/totals_by_category.dart/totals_by_category_provider.dart';
 import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
 import 'package:spendwise_1/presentation/widgets/inputs/custom_currency_field.dart';
@@ -85,10 +84,9 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
     int month,
     Transaction transaction,
   ) async {
-    // USA INVALIDATE en lugar de REFRESH
+    
     ref.invalidate(totalsProvider((year, month)));
     ref.invalidate(dailyTotalsProvider((year: year, month: month)));
-    ref.invalidate(totalsByCategoryProvider);
     ref.invalidate(monthlyTotalsProvider(year));
 
     await ref.read(transactionsProvider.notifier).loadTransactions();
@@ -185,6 +183,9 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
                 if (value == null) {
                   return 'La fecha es requerida';
                 }
+                if (value.isAfter(DateTime.now())) {
+                  return 'No se pueden seleccionar fechas futuras';
+                }
                 return null;
               },
             ),
@@ -215,6 +216,7 @@ class _CustomTransactionFormState extends ConsumerState<CustomTransactionForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    print('Selected Date: $selectedDate');
                     final categories = ref
                         .read(categoriesProvider)
                         .maybeWhen(data: (data) => data, orElse: () => []);

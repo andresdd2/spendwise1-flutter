@@ -9,7 +9,6 @@ class CustomDatePickerField extends StatelessWidget {
   final Function(DateTime)? onDateSelected;
   final String? Function(DateTime?)? validator;
   final DateTime? firstDate;
-  final DateTime? lastDate;
 
   const CustomDatePickerField({
     super.key,
@@ -20,7 +19,6 @@ class CustomDatePickerField extends StatelessWidget {
     this.onDateSelected,
     this.validator,
     this.firstDate,
-    this.lastDate,
   });
 
   String _formatDate(DateTime date) {
@@ -44,28 +42,28 @@ class CustomDatePickerField extends StatelessWidget {
                   context: context,
                   initialDate: selectedDate ?? DateTime.now(),
                   firstDate: firstDate ?? DateTime(1900),
-                  lastDate: lastDate ?? DateTime(2100),
+                  lastDate:
+                      DateTime.now(),
                   builder: (context, child) {
                     return Theme(
                       data: Theme.of(context).copyWith(
                         colorScheme: ColorScheme.dark(
-                          primary: AppPalette
-                              .cAccent, // Color principal (header y selección)
+                          primary: AppPalette.cAccent,
                           onPrimary: AppPalette
-                              .cText, // Texto sobre el color principal
+                              .cText,
                           surface:
-                              AppPalette.cComponent, // Fondo del calendario
-                          onSurface: AppPalette.cText, // Texto de los días
+                              AppPalette.cComponent,
+                          onSurface: AppPalette.cText, 
                           background:
-                              AppPalette.cBackground, // Fondo del diálogo
+                              AppPalette.cBackground,
                           onBackground:
-                              AppPalette.cText, // Texto sobre el fondo
+                              AppPalette.cText,
                         ),
                         dialogBackgroundColor: AppPalette.cComponent,
                         textButtonTheme: TextButtonThemeData(
                           style: TextButton.styleFrom(
                             foregroundColor:
-                                AppPalette.cAccent, // Color de los botones
+                                AppPalette.cAccent,
                           ),
                         ),
                       ),

@@ -140,13 +140,13 @@ class _DailyLineChartState extends State<DailyLineChart> {
                       : 5,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: AppPalette.cComponent3.withOpacity(0.3),
+                      color: AppPalette.cComponent3.withAlpha(3),
                       strokeWidth: 1,
                     );
                   },
                   getDrawingVerticalLine: (value) {
                     return FlLine(
-                      color: AppPalette.cComponent3.withOpacity(0.2),
+                      color: AppPalette.cComponent3.withAlpha(2),
                       strokeWidth: 0.5,
                     );
                   },
@@ -240,9 +240,9 @@ class _DailyLineChartState extends State<DailyLineChart> {
                         show: true,
                         gradient: LinearGradient(
                           colors: [
-                            AppPalette.cAccent.withOpacity(0.4),
-                            AppPalette.cAccent.withOpacity(0.1),
-                            AppPalette.cAccent.withOpacity(0.0),
+                            AppPalette.cAccent.withAlpha(4),
+                            AppPalette.cAccent.withAlpha(1),
+                            AppPalette.cAccent.withAlpha(0),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -263,9 +263,9 @@ class _DailyLineChartState extends State<DailyLineChart> {
                         show: true,
                         gradient: LinearGradient(
                           colors: [
-                            Colors.redAccent.withOpacity(0.4),
-                            Colors.redAccent.withOpacity(0.1),
-                            Colors.redAccent.withOpacity(0.0),
+                            Colors.redAccent.withAlpha(4),
+                            Colors.redAccent.withAlpha(1),
+                            Colors.redAccent.withAlpha(0),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -301,10 +301,10 @@ class _DailyLineChartState extends State<DailyLineChart> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? color.withOpacity(0.2) : AppPalette.cComponent3,
+          color: isActive ? color.withAlpha(2) : AppPalette.cComponent3,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? color : AppPalette.grisClaro.withOpacity(0.3),
+            color: isActive ? color : AppPalette.grisClaro.withAlpha(3),
             width: 2,
           ),
         ),

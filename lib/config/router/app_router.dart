@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
 import 'package:spendwise_1/presentation/screens/account_screen.dart';
-import 'package:spendwise_1/presentation/screens/category_screen.dart';
 import 'package:spendwise_1/presentation/screens/home_screen.dart';
 import 'package:spendwise_1/presentation/screens/register_screen.dart';
 import 'package:spendwise_1/presentation/screens/transaction_screen.dart';
@@ -25,14 +24,6 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/home',
               builder: (context, state) => const HomeScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/category-screen',
-              builder: (context, state) => const CategoryScreen(),
             ),
           ],
         ),

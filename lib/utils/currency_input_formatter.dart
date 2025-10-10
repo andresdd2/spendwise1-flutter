@@ -30,8 +30,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
   }
 }
 
-/// Parsea un string con formato de moneda y devuelve el valor numérico
-/// Ejemplo: "$312.000" -> 312000.0
+/// "$312.000" -> 312000.0
 double parseCurrencyValue(String formattedValue) {
   if (formattedValue.isEmpty) return 0.0;
   String digitsOnly = formattedValue.replaceAll(RegExp(r'[^\d]'), '');
@@ -39,8 +38,7 @@ double parseCurrencyValue(String formattedValue) {
   return double.parse(digitsOnly);
 }
 
-/// Formatea un valor numérico a string con formato de moneda
-/// Ejemplo: 312000.0 -> "$312.000"
+/// 312000.0 -> "$312.000"
 String formatCurrencyValue(double amount) {
   final intAmount = amount.toInt();
   final formatter = NumberFormat.currency(
