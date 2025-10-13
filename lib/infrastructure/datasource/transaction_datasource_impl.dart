@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:spendwise_1/config/constants/Environment.dart';
 import 'package:spendwise_1/domain/datasource/transaction_datasource.dart';
 import 'package:spendwise_1/domain/entity/dailay_totals.dart';
 import 'package:spendwise_1/domain/entity/monthly_totals.dart';
 import 'package:spendwise_1/domain/entity/totals.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
+import 'package:spendwise_1/infrastructure/dio/dio_client.dart';
 import 'package:spendwise_1/infrastructure/mappers/daily_totals_mapper.dart';
 import 'package:spendwise_1/infrastructure/mappers/monthly_totals_mapper.dart';
 import 'package:spendwise_1/infrastructure/mappers/totals_mapper.dart';
@@ -15,10 +15,10 @@ import 'package:spendwise_1/infrastructure/models/totals_model.dart';
 import 'package:spendwise_1/infrastructure/models/transaction_model.dart';
 
 class TransactionDatasourceImpl implements TransactionDatasource {
-  final Dio dio;
+  final Dio _dio;
 
-  TransactionDatasourceImpl()
-    : dio = Dio(BaseOptions(baseUrl: Environment.apiBaseUrl));
+  // DioClient centralizado que ya tiene el AuthInterceptor configurado con JWT
+  TransactionDatasourceImpl() : _dio = DioClient.instance;
 
   @override
   Future<List<Transaction>> getTransactions({int? limit}) async {
@@ -27,7 +27,9 @@ class TransactionDatasourceImpl implements TransactionDatasource {
       if (limit != null) {
         url += '?limit=$limit';
       }
-      final response = await dio.get(url);
+
+      final response = await _dio.get(url);
+
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = response.data;
         final models = jsonList
@@ -39,95 +41,40 @@ class TransactionDatasourceImpl implements TransactionDatasource {
           'Error al cargar las transacciones: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      throw Exception('Error al cargar transacciones: ${e.message}');
     } catch (e) {
       throw Exception('Error en la petición: $e');
     }
   }
 
   @override
-  Future<Totals> getTotals(int year, int month) async {
+  Future<Transaction> getTransactionById(String id) async {
     try {
-      final response = await dio.get(
-        '/transaction/totals?year=$year&month=$month',
-      );
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonList = response.data;
-        if (jsonList.isEmpty) {
-          return Totals(income: 0, expense: 0);
-        }
-        final model = TotalsModel.fromJson(
-          jsonList.first as Map<String, dynamic>,
-        );
-        return TotalsMapper.toEntity(model);
-      } else {
-        throw Exception('Error al cargar los totales: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error en la petición de totales: $e');
-    }
-  }
-
-  @override
-  Future<String> createTransaction(Transaction transaction) async {
-    try {
-      final model = TransactionMapper.toModel(transaction);
-      final requestBody = model.toCreateJson();
-      final response = await dio.post('/transaction', data: requestBody);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final message = response.data['message'] as String;
-        return message;
-      } else {
-        throw Exception(
-          'Error al crear la transacción: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      throw Exception('Error en la petición de creación: $e');
-    }
-  }
-
-  @override
-  Future<List<MonthlyTotals>> getMonthlyTotals(int year) async {
-    try {
-      final response = await dio.get('/transaction/totals/monthly?year=$year');
+      final response = await _dio.get('/transaction/$id');
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = response.data;
-        final models = jsonList
-            .map((json) => MonthlyTotalsModel.fromJson(json))
-            .toList();
-        return MonthlyTotalsMapper.toEntities(models);
+        final json = response.data as Map<String, dynamic>;
+        final model = TransactionModel.fromJson(json);
+        return TransactionMapper.toEntity(model);
       } else {
         throw Exception(
-          'Error al cargar los totales mensuales: ${response.statusCode}',
+          'Error al cargar la transacción: ${response.statusCode}',
         );
       }
-    } catch (e) {
-      throw Exception('Error en la petición de totales mensuales: $e');
-    }
-  }
-
-  @override
-  Future<List<DailyTotals>> getDailyTotals(int year, int month) async {
-    try {
-      final response = await dio.get(
-        '/transaction/totals/daily?year=$year&month=$month',
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonList = response.data;
-        final models = jsonList
-            .map((json) => DailyTotalsModel.fromJson(json))
-            .toList();
-        return DailyTotalsMapper.toEntities(models);
-      } else {
-        throw Exception(
-          'Error al cargar los totales diarios: ${response.statusCode}',
-        );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
       }
+      if (e.response?.statusCode == 404) {
+        throw Exception('Transacción no encontrada.');
+      }
+      throw Exception('Error al cargar la transacción: ${e.message}');
     } catch (e) {
-      throw Exception('Error en la petición de totales diarios: $e');
+      throw Exception('Error en la petición: $e');
     }
   }
 
@@ -142,7 +89,7 @@ class TransactionDatasourceImpl implements TransactionDatasource {
       final endDateStr =
           '${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
 
-      final response = await dio.get(
+      final response = await _dio.get(
         '/transaction?startDate=$startDateStr&endDate=$endDateStr',
       );
 
@@ -157,26 +104,128 @@ class TransactionDatasourceImpl implements TransactionDatasource {
           'Error al cargar transacciones por rango: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      throw Exception('Error al cargar transacciones por rango: ${e.message}');
     } catch (e) {
       throw Exception('Error en la petición por rango de fechas: $e');
     }
   }
 
   @override
-  Future<String> deleteTransaction(String id) async {
+  Future<Totals> getTotals(int year, int month) async {
     try {
-      final response = await dio.delete('/transaction/$id');
+      final response = await _dio.get(
+        '/transaction/totals?year=$year&month=$month',
+      );
 
       if (response.statusCode == 200) {
+        final List<dynamic> jsonList = response.data;
+        if (jsonList.isEmpty) {
+          return Totals(income: 0, expense: 0);
+        }
+        final model = TotalsModel.fromJson(
+          jsonList.first as Map<String, dynamic>,
+        );
+        return TotalsMapper.toEntity(model);
+      } else {
+        throw Exception('Error al cargar los totales: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      throw Exception('Error al cargar totales: ${e.message}');
+    } catch (e) {
+      throw Exception('Error en la petición de totales: $e');
+    }
+  }
+
+  @override
+  Future<List<MonthlyTotals>> getMonthlyTotals(int year) async {
+    try {
+      final response = await _dio.get('/transaction/totals/monthly?year=$year');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = response.data;
+        final models = jsonList
+            .map((json) => MonthlyTotalsModel.fromJson(json))
+            .toList();
+        return MonthlyTotalsMapper.toEntities(models);
+      } else {
+        throw Exception(
+          'Error al cargar los totales mensuales: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      throw Exception('Error al cargar totales mensuales: ${e.message}');
+    } catch (e) {
+      throw Exception('Error en la petición de totales mensuales: $e');
+    }
+  }
+
+  @override
+  Future<List<DailyTotals>> getDailyTotals(int year, int month) async {
+    try {
+      final response = await _dio.get(
+        '/transaction/totals/daily?year=$year&month=$month',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = response.data;
+        final models = jsonList
+            .map((json) => DailyTotalsModel.fromJson(json))
+            .toList();
+        return DailyTotalsMapper.toEntities(models);
+      } else {
+        throw Exception(
+          'Error al cargar los totales diarios: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      throw Exception('Error al cargar totales diarios: ${e.message}');
+    } catch (e) {
+      throw Exception('Error en la petición de totales diarios: $e');
+    }
+  }
+
+  @override
+  Future<String> createTransaction(Transaction transaction) async {
+    try {
+      final model = TransactionMapper.toModel(transaction);
+      final requestBody = model.toCreateJson();
+
+      final response = await _dio.post('/transaction', data: requestBody);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final message = response.data['message'] as String;
         return message;
       } else {
         throw Exception(
-          'Error al eliminar la transacción: ${response.statusCode}',
+          'Error al crear la transacción: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      if (e.response?.statusCode == 400 || e.response?.statusCode == 403) {
+        final errorMessage =
+            e.response?.data['message'] ?? e.response?.data.toString();
+        throw Exception('Datos inválidos: $errorMessage');
+      }
+      throw Exception('Error al crear la transacción: ${e.message}');
     } catch (e) {
-      throw Exception('Error en la petición de eliminación: $e');
+      throw Exception('Error en la petición de creación: $e');
     }
   }
 
@@ -185,7 +234,7 @@ class TransactionDatasourceImpl implements TransactionDatasource {
     try {
       final model = TransactionMapper.toModel(transaction);
       final requestBody = model.toCreateJson();
-      final response = await dio.patch('/transaction/$id', data: requestBody);
+      final response = await _dio.patch('/transaction/$id', data: requestBody);
 
       if (response.statusCode == 200) {
         final message = response.data['message'] as String;
@@ -195,26 +244,45 @@ class TransactionDatasourceImpl implements TransactionDatasource {
           'Error al actualizar la transacción: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      if (e.response?.statusCode == 404) {
+        throw Exception('Transacción no encontrada.');
+      }
+      if (e.response?.statusCode == 400) {
+        throw Exception('Datos inválidos. Verifica la información ingresada.');
+      }
+      throw Exception('Error al actualizar la transacción: ${e.message}');
     } catch (e) {
       throw Exception('Error en la petición de actualización: $e');
     }
   }
 
   @override
-  Future<Transaction> getTransactionById(String id) async {
+  Future<String> deleteTransaction(String id) async {
     try {
-      final response = await dio.get('/transaction/$id');
+      final response = await _dio.delete('/transaction/$id');
+
       if (response.statusCode == 200) {
-        final json = response.data as Map<String, dynamic>;
-        final model = TransactionModel.fromJson(json);
-        return TransactionMapper.toEntity(model);
+        final message = response.data['message'] as String;
+        return message;
       } else {
         throw Exception(
-          'Error al cargar la transacción: ${response.statusCode}',
+          'Error al eliminar la transacción: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('No autorizado. Por favor inicia sesión nuevamente.');
+      }
+      if (e.response?.statusCode == 404) {
+        throw Exception('Transacción no encontrada.');
+      }
+      throw Exception('Error al eliminar la transacción: ${e.message}');
     } catch (e) {
-      throw Exception('Error en la petición: $e');
+      throw Exception('Error en la petición de eliminación: $e');
     }
   }
 }

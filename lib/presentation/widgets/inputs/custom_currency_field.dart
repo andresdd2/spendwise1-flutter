@@ -39,7 +39,7 @@ class CustomCurrencyField extends StatelessWidget {
         fontWeight: FontWeight.w500,
       ),
       cursorColor: Colors.black,
-      onChanged: onChanged, // Ahora se pasa directamente el String
+      onChanged: onChanged,
       validator: validator,
       decoration: InputDecoration(
         enabledBorder: border.copyWith(

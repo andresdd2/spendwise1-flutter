@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spendwise_1/config/theme/app_palette.dart';
 
 class CustomTextFormField extends StatelessWidget {
   final String? label;
@@ -6,8 +7,14 @@ class CustomTextFormField extends StatelessWidget {
   final String? errorMessage;
   final bool? obscureText;
   final String? initialValue;
+  final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final Widget? suffixIcon;
+  final TextInputAction? textInputAction;
   final Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final bool? enabled;
+  final Function(String)? onFieldSubmitted;
 
   const CustomTextFormField({
     super.key,
@@ -16,8 +23,14 @@ class CustomTextFormField extends StatelessWidget {
     this.errorMessage,
     this.obscureText,
     this.onChanged,
-    this.validator, 
+    this.validator,
     this.initialValue,
+    this.controller,
+    this.keyboardType,
+    this.textInputAction,
+    this.suffixIcon,
+    this.enabled,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -25,17 +38,23 @@ class CustomTextFormField extends StatelessWidget {
     final border = OutlineInputBorder(borderRadius: BorderRadius.circular(15));
 
     return TextFormField(
+      controller: controller,
       onChanged: onChanged,
       validator: validator,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
+      enabled: enabled ?? true,
       style: TextStyle(color: Colors.black),
-      cursorColor: Colors.black,
-      initialValue: initialValue,
+      cursorColor: AppPalette.cComponent3,
+      obscureText: obscureText ?? false,
+      initialValue: controller == null ? initialValue : null,
       decoration: InputDecoration(
         enabledBorder: border.copyWith(
-          borderSide: BorderSide(color: Colors.blueAccent),
+          borderSide: BorderSide(color: AppPalette.grisClaro),
         ),
         focusedBorder: border.copyWith(
-          borderSide: BorderSide(color: Colors.blueAccent),
+          borderSide: BorderSide(color: AppPalette.grisClaro),
         ),
         errorBorder: border.copyWith(
           borderSide: BorderSide(color: Colors.red.shade800),
@@ -43,13 +62,13 @@ class CustomTextFormField extends StatelessWidget {
         focusedErrorBorder: border.copyWith(
           borderSide: BorderSide(color: Colors.red.shade800),
         ),
-        label: label != null ? Text(label!) : null,
-        labelStyle: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
+        disabledBorder: border.copyWith(
+          borderSide: BorderSide(color: AppPalette.grisClaro.withOpacity(0.5)),
         ),
+        label: label != null ? Text(label!) : null,
+        labelStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         hintText: hintText,
-        hintStyle: TextStyle(color: Colors.grey),
+        hintStyle: TextStyle(color: AppPalette.cComponent3),
         isDense: true,
         focusColor: Colors.blueAccent,
         contentPadding: const EdgeInsets.symmetric(
@@ -57,8 +76,11 @@ class CustomTextFormField extends StatelessWidget {
           vertical: 12,
         ),
         filled: true,
-        fillColor: Colors.white60,
+        fillColor: (enabled ?? true)
+            ? AppPalette.grisClaro
+            : AppPalette.grisClaro.withOpacity(0.5),
         errorText: errorMessage,
+        suffixIcon: suffixIcon,
       ),
     );
   }

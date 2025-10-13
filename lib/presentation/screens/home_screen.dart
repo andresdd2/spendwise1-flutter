@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendwise_1/config/theme/app_palette.dart';
+import 'package:spendwise_1/presentation/providers/auth/auth_provider.dart';
 import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_provider.dart';
 import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
 import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
@@ -18,6 +19,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final year = AppDateUtils.getCurrentYear();
     final month = AppDateUtils.getCurrentMonth();
+    final authState = ref.watch(authProvider);
 
     final transactionsState = ref.watch(transactionsProvider);
     final totalsState = ref.watch(totalsProvider((year, month)));
@@ -34,7 +36,7 @@ class HomeScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hola, User.',
+              'Hola, ${authState.userEmail ?? 'Usuario'} .',
               style: TextStyle(
                 color: AppPalette.cText,
                 fontWeight: FontWeight.bold,
