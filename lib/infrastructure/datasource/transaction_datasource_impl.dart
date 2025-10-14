@@ -17,7 +17,6 @@ import 'package:spendwise_1/infrastructure/models/transaction_model.dart';
 class TransactionDatasourceImpl implements TransactionDatasource {
   final Dio _dio;
 
-  // DioClient centralizado que ya tiene el AuthInterceptor configurado con JWT
   TransactionDatasourceImpl() : _dio = DioClient.instance;
 
   @override

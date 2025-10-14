@@ -24,7 +24,10 @@ class HomeScreen extends ConsumerWidget {
     ref.listen(authProvider, (previous, next) {
       if (previous?.userEmail != next.userEmail && next.isAuthenticated) {
         Future.microtask(() {
-          ref.read(transactionsProvider.notifier).loadTransactions(limit: 10);
+          final notifier = ref.read(transactionsProvider.notifier);
+          notifier.loadTransactions(
+            limit: 10,
+          );
           ref.read(totalsProvider((year, month)).notifier).loadTotals();
         });
       }

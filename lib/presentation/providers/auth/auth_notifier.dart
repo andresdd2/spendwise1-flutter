@@ -64,8 +64,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final user = await _repository.signup(name, email, password);
       if (user != null) {
-        state = AuthState(
-          isAuthenticated: true,
+        state = state.copyWith(
+          // isAuthenticated: true,
           userEmail: user.email,
           isLoading: false,
         );

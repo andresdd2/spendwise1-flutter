@@ -67,7 +67,7 @@ class _CustomSignupFormState extends ConsumerState<CustomSignupForm> {
             backgroundColor: AppPalette.cAccent,
           ),
         );
-        context.go('/');
+        context.go('/login');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -175,7 +175,7 @@ class _CustomSignupFormState extends ConsumerState<CustomSignupForm> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                color: AppPalette.cText.withAlpha(5),
+                color: AppPalette.cComponent3,
               ),
               onPressed: () {
                 setState(() => _obscurePassword = !_obscurePassword);
@@ -216,7 +216,7 @@ class _CustomSignupFormState extends ConsumerState<CustomSignupForm> {
                 _obscureConfirmPassword
                     ? Icons.visibility_off
                     : Icons.visibility,
-                color: AppPalette.cText.withAlpha(5),
+                color: AppPalette.cComponent3,
               ),
               onPressed: () {
                 setState(

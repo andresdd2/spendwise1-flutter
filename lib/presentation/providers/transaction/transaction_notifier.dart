@@ -5,6 +5,7 @@ import 'package:spendwise_1/presentation/providers/transaction/transaction_state
 
 class TransactionsNotifier extends StateNotifier<TransactionsState> {
   final TransactionRepository repository;
+  bool _isDisposed = false;
 
   TransactionsNotifier(this.repository) : super(TransactionsState()) {
     loadTransactions(limit: 10);
@@ -12,17 +13,22 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
 
   @override
   void dispose() {
-    state = TransactionsState();
+    _isDisposed = true;
     super.dispose();
   }
 
   Future<void> loadTransactions({int? limit}) async {
+    if (_isDisposed) return;
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final transactions = await repository.getTransactions(limit: limit);
-      state = state.copyWith(transactions: transactions, isLoading: false);
+      if (!_isDisposed) {
+        state = state.copyWith(transactions: transactions, isLoading: false);
+      }
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (!_isDisposed) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
     }
   }
 
@@ -30,56 +36,76 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
     DateTime startDate,
     DateTime endDate,
   ) async {
+    if (_isDisposed) return;
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final transactions = await repository.getTransactionsByDateRange(
         startDate,
         endDate,
       );
-      state = state.copyWith(transactions: transactions, isLoading: false);
+      if (!_isDisposed) {
+        state = state.copyWith(transactions: transactions, isLoading: false);
+      }
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (!_isDisposed) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
     }
   }
 
   Future<String> addTransaction(Transaction transaction) async {
+    if (_isDisposed) return Future.value('');
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final message = await repository.createTransaction(transaction);
-      state = state.copyWith(
-        transactions: [...state.transactions, transaction],
-        isLoading: false,
-      );
-      await loadTransactions();
+      if (!_isDisposed) {
+        state = state.copyWith(
+          transactions: [...state.transactions, transaction],
+          isLoading: false,
+        );
+        await loadTransactions();
+      }
       return message;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (!_isDisposed) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
       throw Exception(e);
     }
   }
 
   Future<String> updateTransaction(String id, Transaction transaction) async {
+    if (_isDisposed) return Future.value('');
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final message = await repository.updateTransaction(id, transaction);
-      await loadTransactions();
-      state = state.copyWith(isLoading: false);
+      if (!_isDisposed) {
+        await loadTransactions();
+        state = state.copyWith(isLoading: false);
+      }
       return message;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (!_isDisposed) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
       throw Exception(e);
     }
   }
 
   Future<String> deleteTransaction(String id) async {
+    if (_isDisposed) return Future.value('');
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final message = await repository.deleteTransaction(id);
-      await loadTransactions();
-      state = state.copyWith(isLoading: false);
+      if (!_isDisposed) {
+        await loadTransactions();
+        state = state.copyWith(isLoading: false);
+      }
       return message;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (!_isDisposed) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
       throw Exception(e);
     }
   }
