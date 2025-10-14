@@ -36,7 +36,6 @@ class _CustomSignupFormState extends ConsumerState<CustomSignupForm> {
       return;
     }
 
-    // Validar que las contraseñas coincidan
     if (_passwordController.text != _confirmPasswordController.text) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -68,7 +67,6 @@ class _CustomSignupFormState extends ConsumerState<CustomSignupForm> {
             backgroundColor: AppPalette.cAccent,
           ),
         );
-        // Navegar a la pantalla principal
         context.go('/');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

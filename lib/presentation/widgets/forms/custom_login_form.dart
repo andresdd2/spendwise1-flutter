@@ -53,7 +53,6 @@ class _CustomLoginFormState extends ConsumerState<CustomLoginForm> {
       } catch (e) {
         if (!mounted) return;
 
-        // Mostrar error específico
         String errorMessage = 'Error al iniciar sesión';
 
         if (e.toString().contains('Credenciales inválidas')) {

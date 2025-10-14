@@ -17,7 +17,10 @@ final transactionsProvider =
       return TransactionsNotifier(repository);
     });
 
-    final transactionByIdProvider = FutureProvider.family<Transaction, String>((ref, id) async {
+final transactionByIdProvider = FutureProvider.family<Transaction, String>((
+  ref,
+  id,
+) async {
   final repository = ref.watch(transactionRepositoryProvider);
   return await repository.getTransactionById(id);
 });

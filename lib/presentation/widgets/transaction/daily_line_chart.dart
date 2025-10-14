@@ -111,7 +111,10 @@ class _DailyLineChartState extends State<DailyLineChart> {
                         }
                         final day = widget.data[index].day;
                         final value = spot.y;
-                        final isIncome = spot.barIndex == 0;
+
+                        final dayData = widget.data[index];
+                        final isIncome = (value - dayData.income).abs() < 0.01;
+
                         final label = isIncome ? 'Ingresos' : 'Gastos';
                         final color = isIncome
                             ? AppPalette.cAccent

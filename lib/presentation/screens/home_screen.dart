@@ -21,6 +21,15 @@ class HomeScreen extends ConsumerWidget {
     final month = AppDateUtils.getCurrentMonth();
     final authState = ref.watch(authProvider);
 
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.userEmail != next.userEmail && next.isAuthenticated) {
+        Future.microtask(() {
+          ref.read(transactionsProvider.notifier).loadTransactions(limit: 10);
+          ref.read(totalsProvider((year, month)).notifier).loadTotals();
+        });
+      }
+    });
+
     final transactionsState = ref.watch(transactionsProvider);
     final totalsState = ref.watch(totalsProvider((year, month)));
     final monthlyTotalsAsync = ref.watch(monthlyTotalsProvider(year));

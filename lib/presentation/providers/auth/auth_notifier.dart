@@ -2,21 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendwise_1/domain/repository/auth_repository.dart';
 import 'package:spendwise_1/infrastructure/services/token_storage_service.dart';
 import 'package:spendwise_1/presentation/providers/auth/auth_state.dart';
+import 'package:spendwise_1/presentation/providers/daily_totals/daily_totals_provider.dart';
+import 'package:spendwise_1/presentation/providers/monthly_totals/monthly_totals.dart';
+import 'package:spendwise_1/presentation/providers/totals_transaction/totals_provider.dart';
+import 'package:spendwise_1/presentation/providers/transaction/transaction_provider.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  final Ref _ref;
 
-  AuthNotifier(this._repository) : super(AuthState(isAuthenticated: false)) {
+  AuthNotifier(this._repository, this._ref)
+    : super(AuthState(isAuthenticated: false)) {
     _checkAuthStatus();
   }
 
   Future<void> _checkAuthStatus() async {
     state = state.copyWith(isLoading: true);
-
     try {
       final hasToken = await TokenStorageService.hasToken();
       final userEmail = await TokenStorageService.getEmail();
-
       if (hasToken && userEmail != null) {
         state = AuthState(
           isAuthenticated: true,
@@ -33,16 +37,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<bool> login(String email, String password) async {
     state = state.copyWith(isLoading: true);
-
     try {
       final user = await _repository.login(email, password);
-
       if (user != null) {
         state = AuthState(
           isAuthenticated: true,
           userEmail: user.email,
           isLoading: false,
         );
+
+        _invalidateDataProviders();
+
         return true;
       } else {
         state = state.copyWith(isLoading: false);
@@ -56,16 +61,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<bool> signup(String name, String email, String password) async {
     state = state.copyWith(isLoading: true);
-
     try {
       final user = await _repository.signup(name, email, password);
-
       if (user != null) {
         state = AuthState(
           isAuthenticated: true,
           userEmail: user.email,
           isLoading: false,
         );
+
+        _invalidateDataProviders();
+
         return true;
       } else {
         state = state.copyWith(isLoading: false);
@@ -79,6 +85,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     await _repository.logout();
+
+    _invalidateDataProviders();
+
     state = AuthState(isAuthenticated: false);
   }
 
@@ -93,5 +102,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       print('Error refrescando usuario: $e');
     }
+  }
+
+  void _invalidateDataProviders() {
+    Future.microtask(() {
+      try {
+        _ref.invalidate(transactionsProvider);
+        _ref.invalidate(totalsProvider);
+        _ref.invalidate(monthlyTotalsProvider);
+        _ref.invalidate(dailyTotalsProvider);
+      } catch (e) {
+        print('Error invalidando providers: $e');
+      }
+    });
   }
 }

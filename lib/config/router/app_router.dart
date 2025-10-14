@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendwise_1/domain/entity/transaction.dart';
 import 'package:spendwise_1/presentation/providers/auth/auth_provider.dart';
+import 'package:spendwise_1/presentation/providers/auth/auth_state.dart';
 import 'package:spendwise_1/presentation/screens/account_screen.dart';
 import 'package:spendwise_1/presentation/screens/home_screen.dart';
 import 'package:spendwise_1/presentation/screens/login_screen.dart';
@@ -16,66 +17,89 @@ import 'package:spendwise_1/presentation/widgets/transaction/transaction_detail.
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-// Provider del router que depende del estado de autenticación
+class _GoRouterRefreshStream extends ChangeNotifier {
+  _GoRouterRefreshStream(this._ref) {
+    _ref.listen<AuthState>(authProvider, (previous, next) {
+      if (previous?.isAuthenticated != next.isAuthenticated) {
+        notifyListeners();
+      }
+    });
+  }
+
+  final Ref _ref;
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  final isAuthenticated = authState.isAuthenticated;
+  final notifier = _GoRouterRefreshStream(ref);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/onboarding',
-    // Usa refreshListenable para que el router reaccione a cambios de auth
-    refreshListenable: _AuthStateNotifier(ref),
+    refreshListenable: notifier,
+    debugLogDiagnostics: false,
     redirect: (context, state) {
-      final currentPath = state.matchedLocation;
+      final authState = ref.read(authProvider);
+      final isAuthenticated = authState.isAuthenticated;
+      final isLoading = authState.isLoading;
+      final location = state.matchedLocation;
 
-      // Rutas públicas que no requieren autenticación
       const publicRoutes = ['/onboarding', '/welcome', '/login', '/signup'];
+      final isPublicRoute = publicRoutes.contains(location);
 
-      final isPublicRoute = publicRoutes.contains(currentPath);
+      if (isLoading) {
+        return null;
+      }
 
-      // Si está autenticado y está en una ruta pública, redirigir a home
       if (isAuthenticated && isPublicRoute) {
         return '/home';
       }
 
-      // Si NO está autenticado y NO está en una ruta pública, redirigir a onboarding
       if (!isAuthenticated && !isPublicRoute) {
         return '/onboarding';
       }
 
-      // Permitir el acceso
       return null;
     },
     routes: [
-      // Rutas de autenticación (públicas)
+      
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        pageBuilder: (context, state) => NoTransitionPage(
+          key: state.pageKey,
+          child: const OnboardingScreen(),
+        ),
       ),
       GoRoute(
         path: '/welcome',
-        builder: (context, state) => const WelcomeScreen(),
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const WelcomeScreen()),
       ),
-      GoRoute(path: '/login', 
-        builder: (context, state) => const LoginScreen()
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const LoginScreen()),
       ),
       GoRoute(
         path: '/signup',
-        builder: (context, state) => const SignupScreen(),
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const SignupScreen()),
       ),
 
-      // Rutas protegidas (requieren autenticación)
+    
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return AppShell(navigationShell: navigationShell);
+        pageBuilder: (context, state, navigationShell) {
+          return NoTransitionPage(
+            child: AppShell(navigationShell: navigationShell),
+          );
         },
         branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/home',
-                builder: (context, state) => const HomeScreen(),
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const HomeScreen(),
+                ),
               ),
             ],
           ),
@@ -83,7 +107,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/transaction-screen',
-                builder: (context, state) => const TransactionScreen(),
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const TransactionScreen(),
+                ),
               ),
             ],
           ),
@@ -91,49 +118,58 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/account-screen',
-                builder: (context, state) => const AccountScreen(),
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const AccountScreen(),
+                ),
               ),
             ],
           ),
         ],
       ),
+
+    
       GoRoute(
         path: '/register-screen',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final transaction = state.extra as Transaction?;
-          return RegisterScreen(transactionToEdit: transaction);
+          return MaterialPage(
+            key: state.pageKey,
+            child: RegisterScreen(transactionToEdit: transaction),
+          );
         },
       ),
       GoRoute(
         path: '/transaction-detail',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final transaction = state.extra as Transaction;
-          return TransactionDetail(transaction: transaction);
+          return MaterialPage(
+            key: state.pageKey,
+            child: TransactionDetail(transaction: transaction),
+          );
         },
       ),
     ],
+
+
+    initialLocation: '/onboarding',
+
+    errorBuilder: (context, state) =>
+        Scaffold(body: Center(child: Text('Error: ${state.error}'))),
   );
 });
 
-class _AuthStateNotifier extends ChangeNotifier {
-  final Ref _ref;
-
-  _AuthStateNotifier(this._ref) {
-    _ref.listen(authProvider, (previous, next) {
-      if (previous?.isAuthenticated != next.isAuthenticated) {
-        notifyListeners();
-      }
-    });
-  }
-}
 
 class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   const AppShell({super.key, required this.navigationShell});
 
   void _onDestinationSelected(int index) {
-    navigationShell.goBranch(index);
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   @override

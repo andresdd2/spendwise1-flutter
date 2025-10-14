@@ -10,9 +10,14 @@ class TransactionsNotifier extends StateNotifier<TransactionsState> {
     loadTransactions(limit: 10);
   }
 
+  @override
+  void dispose() {
+    state = TransactionsState();
+    super.dispose();
+  }
+
   Future<void> loadTransactions({int? limit}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-
     try {
       final transactions = await repository.getTransactions(limit: limit);
       state = state.copyWith(transactions: transactions, isLoading: false);
